@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Planificador Nutricional BudaFitness — Bea & Luis</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white">
+    
+    <!-- Top Header Luminoso -->
+    <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 py-3 px-4 shadow-sm">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+                <div class="flex items-center gap-2.5">
+                    <div class="p-2 bg-emerald-100 border border-emerald-200 rounded-xl text-emerald-600 shadow-sm">
+                        <i data-lucide="utensils-crossed" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                            BudaFitness <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">Nov 2026</span>
+                        </h1>
+                        <p class="text-slate-500 text-[11px] font-medium">Bea & Luis — Menús Inteligentes</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selector de Perfil / Modo -->
+            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200 shadow-inner w-full sm:w-auto justify-center">
+                <button id="mode-luis" onclick="setProfileMode('luis')" class="flex-1 sm:flex-initial px-3.5 py-1.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all bg-white text-emerald-700 shadow-sm">Luis</button>
+                <button id="mode-bea" onclick="setProfileMode('bea')" class="flex-1 sm:flex-initial px-3.5 py-1.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all text-slate-600 hover:text-slate-900">Bea</button>
+                <button id="mode-both" onclick="setProfileMode('both')" class="flex-1 sm:flex-initial px-3.5 py-1.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1">
+                    <i data-lucide="users" class="w-3 h-3"></i> Ambos
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-3 sm:p-6 space-y-5">
+        
+        <!-- Pestañas de Navegación Superiores -->
+        <div class="flex gap-1.5 bg-slate-200/70 p-1 rounded-2xl border border-slate-200">
+            <button onclick="switchView('interactive')" id="view-btn-interactive" class="flex-1 py-2.5 px-2 rounded-xl font-bold text-xs sm:text-sm bg-white text-emerald-600 border border-emerald-200 flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> <span class="truncate">Detalle & Menú</span>
+            </button>
+            <button onclick="switchView('calendar')" id="view-btn-calendar" class="flex-1 py-2.5 px-2 rounded-xl font-bold text-xs sm:text-sm text-slate-600 flex items-center justify-center gap-1.5 transition-all hover:bg-white/50">
+                <i data-lucide="calendar-days" class="w-4 h-4"></i> <span class="truncate">Calendario</span>
+            </button>
+            <button onclick="switchView('cooking')" id="view-btn-cooking" class="flex-1 py-2.5 px-2 rounded-xl font-bold text-xs sm:text-sm text-slate-600 flex items-center justify-center gap-1.5 transition-all hover:bg-white/50">
+                <i data-lucide="chef-hat" class="w-4 h-4"></i> <span class="truncate">Cocina</span>
+            </button>
+        </div>
+
+        <!-- VISTA 1: CONSULTA DETALLADA & COMPARATIVA -->
+        <div id="view-interactive" class="space-y-4">
+            <div class="bg-white border border-slate-200 rounded-3xl p-4 sm:p-6 shadow-sm space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <h2 class="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-2">
+                        <i data-lucide="filter" class="w-4 h-4 text-emerald-600"></i> Filtros de Menú y Pautas
+                    </h2>
+                    <div id="active-mode-label" class="text-xs px-3 py-1 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        Perfil: Luis
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">1. Tipo de Día</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="setDayType('on')" id="filter-on" class="py-2.5 px-3 rounded-xl font-bold text-xs uppercase tracking-wider border border-emerald-300 bg-emerald-50 text-emerald-700 transition-all flex items-center justify-center gap-1.5 shadow-sm">
+                                <i data-lucide="dumbbell" class="w-3.5 h-3.5"></i> Días ON
+                            </button>
+                            <button onclick="setDayType('off')" id="filter-off" class="py-2.5 px-3 rounded-xl font-bold text-xs uppercase tracking-wider border border-slate-200 bg-slate-50 text-slate-600 transition-all flex items-center justify-center gap-1.5 hover:bg-slate-100">
+                                <i data-lucide="coffee" class="w-3.5 h-3.5"></i> Días OFF
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">2. Franja Horaria</label>
+                        <select id="meal-select" onchange="renderInteractiveView()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-800 font-semibold text-xs sm:text-sm focus:outline-none focus:border-emerald-500 shadow-inner">
+                            <option value="all">🍽️ Todas las Comidas</option>
+                            <option value="levantarse">🌅 Al Levantarse</option>
+                            <option value="desayuno">☀️ Desayuno</option>
+                            <option value="manana">⏰ Media Mañana</option>
+                            <option value="comida">🍲 Comida (Mediodía)</option>
+                            <option value="merienda">⚡ Merienda / Pre-entreno</option>
+                            <option value="cena">🌙 Cena (Compartida)</option>
+                            <option value="noche">🛏️ Antes de Dormir</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenedor de Tarjetas -->
+            <div id="meals-container" class="space-y-4"></div>
+        </div>
+
+        <!-- VISTA 2: CALENDARIO MENSUAL -->
+        <div id="view-calendar" class="hidden space-y-4">
+            <div class="bg-white border border-slate-200 rounded-3xl p-4 sm:p-6 shadow-sm space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-100">
+                    <div>
+                        <h2 class="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                            <i data-lucide="calendar" class="w-5 h-5 text-emerald-600"></i> Calendario Noviembre 2026
+                        </h2>
+                        <p class="text-slate-500 text-xs mt-0.5">Toca un día para ver su menú detallado</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 w-full sm:w-auto justify-between">
+                        <select id="cal-meal-select" onchange="renderDayDetail(selectedCalendarDay)" class="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-700 shadow-inner">
+                            <option value="all">🍽️ Todas</option>
+                            <option value="desayuno">☀️ Desayuno</option>
+                            <option value="comida">🍲 Comida</option>
+                            <option value="cena">🌙 Cena</option>
+                        </select>
+
+                        <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                            <button onclick="changeWeek(-1)" class="p-1.5 rounded-lg hover:bg-white text-slate-700"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                            <span id="week-indicator" class="px-2 font-bold text-[11px] text-slate-700 uppercase">Sem 1</span>
+                            <button onclick="changeWeek(1)" class="p-1.5 rounded-lg hover:bg-white text-slate-700"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cuadrícula de Días -->
+                <div id="calendar-grid" class="grid grid-cols-4 sm:grid-cols-7 gap-2"></div>
+
+                <!-- Detalle del Día -->
+                <div id="day-detail-container" class="space-y-3 pt-1"></div>
+            </div>
+        </div>
+
+        <!-- VISTA 3: GUÍA DE COCINA -->
+        <div id="view-cooking" class="hidden space-y-4">
+            <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-5">
+                <h2 class="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="chef-hat" class="w-5 h-5 text-emerald-600"></i> Estrategia de Cocina en Pareja
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">
+                        <div class="flex items-center gap-2.5 text-emerald-700 font-bold text-sm">
+                            <i data-lucide="moon" class="w-4 h-4"></i> Cenas de Lunes a Jueves (ON)
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Cocináis todo el pollo/pescado juntos sin aceite. Bea usa su caldo natural; Luis añade sus 10g de AOVE en crudo y sus guisantes en el plato.
+                        </p>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">
+                        <div class="flex items-center gap-2.5 text-indigo-700 font-bold text-sm">
+                            <i data-lucide="sun" class="w-4 h-4"></i> Fines de Semana (OFF)
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Base grande de proteína y verduras al centro. Cada uno sirve su hidrato correspondiente (patata de bote para Bea; arroz/pasta/patata para Luis).
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-[11px] text-slate-400">
+        BudaFitness · Bea & Luis · Noviembre 2026
+    </footer>
+
+    <!-- Script JavaScript unificado y robusto -->
+    <script>
+        const dataLuis = {
+            name: "Luis",
+            meals: [
+                { id: "levantarse", title: "Al Levantarse", icon: "sunrise", shared: true, on: { principal: "1 Café bien cargado", complemento: "Sacarina opcional", nota: "Común en ambos días" }, off: { principal: "1 Café bien cargado", complemento: "Sacarina opcional", nota: "Común en ambos días" } },
+                { id: "desayuno", title: "Comida 1 (Desayuno)", icon: "sun", shared: false, on: { principal: "2 huevos + 100ml claras + 75g pavo/york extra", complemento: "3 lingotes Pan Ortiz + Fruta + Café + 1g Omega 3", nota: "Proteína idéntica" }, off: { principal: "2 huevos + 100ml claras + 75g pavo/york extra", complemento: "75g pan integral Rustik / Sensation + Fruta + Café + 1g Omega 3", nota: "Varía el tipo de pan" } },
+                { id: "manana", title: "Comida 2 (Media Mañana)", icon: "clock", shared: false, on: { principal: "1 yogur proteico Valio ProFeel chocolate", complemento: "1 manzana verde con piel", nota: "Snack rápido ON" }, off: { principal: "250g yogur desnatado proteico 0%", complemento: "25g harina de avena (mezclado en bol)", nota: "Aporte de avena OFF" } },
+                { id: "comida", title: "Comida 3 (Mediodía / Trabajo)", icon: "utensils-crossed", shared: false, on: { principal: "200g pollo, pavo, pescado blanco o marisco", complemento: "1 bolsa de arroz microondas + Vegetales libres (sin aceite)", nota: "Ideal para menú de trabajo" }, off: { principal: "150g pollo, pavo, pescado blanco o marisco", complemento: "100g arroz/pasta (crudo) o 400g patata + Vegetales libres", nota: "Hidrato ajustado OFF" } },
+                { id: "merienda", title: "Comida 4 (Merienda / Pre-entreno)", icon: "zap", shared: false, on: { principal: "Bocadillo: 150g pavo/york extra + Pan sándwich Sensation", complemento: "1/2 tomate + Ketchup zero Heinz o mostaza + Té verde previo", nota: "Pre-entreno activo" }, off: { principal: "200g pechuga de pollo o pavo (calidad extra)", complemento: "1 manzana verde ácida", nota: "Sin té verde" } },
+                { id: "cena", title: "Cena (¡Compartida con Bea!)", icon: "moon", shared: true, on: { principal: "200g-250g Pollo, pavo o pescado blanco", complemento: "Vegetales folio 2 + 150g guisantes + 10g AOVE en crudo + 1g Omega 3", nota: "¡100% Coincidente en cocina!" }, off: { principal: "200g-250g Pollo, pavo o pescado blanco", complemento: "Vegetales folio 2 + 150g guisantes + 10g AOVE en crudo + 1g Omega 3", nota: "¡100% Coincidente en cocina!" } },
+                { id: "noche", title: "Antes de Dormir (Pre-cama)", icon: "bed", shared: false, on: { principal: "250g queso fresco batido 0% proteico", complemento: "10g cacao desgrasado + 1g Omega 3", nota: "Lácteo nocturno ON" }, off: { principal: "250g yogur desnatado proteico 0%", complemento: "Canela o cacao + sacarina + 1g Omega 3", nota: "Lácteo nocturno OFF" } }
+            ]
+        };
+
+        const dataBea = {
+            name: "Bea",
+            meals: [
+                { id: "levantarse", title: "Desayuno Fijo", icon: "sun", shared: true, on: { principal: "1 huevo + 100ml claras + 50g jamón york/pavo extra", complemento: "50g pan integral Rustik + Fruta + Café + 1g Omega 3", nota: "Idéntico todos los días" }, off: { principal: "1 huevo + 100ml claras + 50g jamón york/pavo extra", complemento: "50g pan integral Rustik + Fruta + Café + 1g Omega 3", nota: "Idéntico todos los días" } },
+                { id: "manana", title: "Media Mañana / Merienda I", icon: "clock", shared: false, on: { principal: "1 yogur proteico Valio ProFeel (20g prot)", complemento: "1 ración de fruta del folio 2", nota: "Días de entreno" }, off: { principal: "60g de lomo embuchado", complemento: "1/2 manzana", nota: "Días de descanso" } },
+                { id: "comida", title: "Comida (Al Mediodía)", icon: "utensils-crossed", shared: false, on: { principal: "130g pechuga pollo/pavo (o 2 latas atún)", complemento: "Vegetales libres + Vasito arroz microondas Brillante", nota: "Hidrato rápido ON" }, off: { principal: "130g pechuga pollo/pavo (o 2 latas atún)", complemento: "Vegetales libres + 1/2 frasco patata de bote o garbanzos", nota: "Hidrato en frasco OFF" } },
+                { id: "merienda", title: "Merienda / Pre-entreno", icon: "zap", shared: false, on: { principal: "2 yogures proteicos 0% + 1 fruta (sin plátano)", complemento: "Té verde 15 min antes + Agua con creatina", nota: "Pre-entreno ON" }, off: { principal: "2 yogures proteicos 0% + 1 fruta (sin plátano)", complemento: "Sin té verde ni suplemento extra", nota: "Descanso OFF" } },
+                { id: "cena", title: "Cena (¡Compartida con Luis!)", icon: "moon", shared: true, on: { principal: "125g pollo/pavo o 150g pescado blanco", complemento: "Vegetales opcionales + 200ml caldo pollo + 1 Omega 3", nota: "¡Cena en común!" }, off: { principal: "125g ternera magra / lomo o pollo", complemento: "Vegetales opcionales + 200ml caldo pollo + 1 Omega 3", nota: "¡Cena en común!" } },
+                { id: "noche", title: "Antes de Dormir (Pre-cama)", icon: "bed", shared: false, on: { principal: "125g queso fresco batido 0%", complemento: "5g cacao + 1 onza chocolate negro 85%", nota: "Capricho nocturno ON" }, off: { principal: "1 yogur proteico Valio ProFeel (20g prot)", complemento: "Sin extras", nota: "Descanso OFF" } }
+            ]
+        };
+
+        const novemberDays = [];
+        for(let d = 1; d <= 30; d++) {
+            let dayOfWeek = ((d - 1) % 7) + 1; 
+            let isTraining = (dayOfWeek >= 2 && dayOfWeek <= 5); 
+            novemberDays.push({ day: d, type: isTraining ? 'ON' : 'OFF', labelWeek: Math.ceil(d / 7) });
+        }
+
+        let currentProfileMode = 'luis';
+        let currentDayType = 'on';
+        let currentSelectedWeek = 1;
+        let selectedCalendarDay = 1;
+
+        function getFoodIcon(text) {
+            const t = text.toLowerCase();
+            if(t.includes('café') || t.includes('té')) return '☕';
+            if(t.includes('huevo') || t.includes('claras')) return '🥚';
+            if(t.includes('pollo') || t.includes('pavo') || t.includes('ternera') || t.includes('lomo') || t.includes('jamón') || t.includes('york')) return '🥩';
+            if(t.includes('pescado') || t.includes('merluza') || t.includes('lubina') || t.includes('sepia') || t.includes('marisco') || t.includes('atún')) return '🐟';
+            if(t.includes('yogur') || t.includes('queso') || t.includes('batido')) return '🥛';
+            if(t.includes('pan') || t.includes('arroz') || t.includes('pasta') || t.includes('patata') || t.includes('avena') || t.includes('garbanzo') || t.includes('torta')) return '🌾';
+            if(t.includes('fruta') || t.includes('manzana') || t.includes('tomate') || t.includes('vegetal') || t.includes('verdura') || t.includes('espárragos') || t.includes('champiñones') || t.includes('calabacín') || t.includes('guisantes')) return '🥗';
+            if(t.includes('cacao') || t.includes('chocolate')) return '🍫';
+            if(t.includes('omega') || t.includes('creatina')) return '💊';
+            return '🍴';
+        }
+
+        function setProfileMode(mode) {
+            currentProfileMode = mode;
+            ['luis', 'bea', 'both'].forEach(m => {
+                const btn = document.getElementById(`mode-${m}`);
+                if(m === mode) {
+                    btn.className = 'flex-1 sm:flex-initial px-3.5 py-1.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all bg-white text-emerald-700 shadow-sm';
+                } else {
+                    btn.className = 'flex-1 sm:flex-initial px-3.5 py-1.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all text-slate-600 hover:text-slate-900';
+                }
+            });
+            const labels = { luis: 'Perfil: Luis', bea: 'Perfil: Bea', both: 'Comparación: Ambos' };
+            document.getElementById('active-mode-label').innerText = labels[mode];
+            renderInteractiveView();
+            if(!document.getElementById('view-calendar').classList.contains('hidden')) {
+                renderDayDetail(selectedCalendarDay);
+            }
+        }
+
+        function setDayType(type) {
+            currentDayType = type;
+            const btnOn = document.getElementById('filter-on');
+            const btnOff = document.getElementById('filter-off');
+            if(type === 'on') {
+                btnOn.className = 'py-2.5 px-3 rounded-xl font-bold text-xs uppercase tracking-wider border border-emerald-300 bg-emerald-50 text-emerald-700 transition-all flex items-center justify-center gap-1.5 shadow-sm';
+                btnOff.className = 'py-2.5 px-3 rounded-xl font-bold text-xs uppercase tracking-wider border border-slate-200 bg-slate-50 text-slate-600 transition-all flex items-center justify-center gap-1.5 hover:bg-slate-100';
+            } else {
+                btnOff.className = 'py-2.5 px-3 rounded-xl font-bold text-xs uppercase tracking-wider border border-indigo-300 bg-indigo-50 text-indigo-700 transition-all flex items-center justify-center gap-1.5 shadow-sm';
+                btnOn.className = 'py-2.5 px-3 rounded-xl font-bold text-xs uppercase tracking-wider border border-slate-200 bg-slate-50 text-slate-600 transition-all flex items-center justify-center gap-1.5 hover:bg-slate-100';
+            }
+            renderInteractiveView();
+        }
+
+        function switchView(viewName) {
+            ['interactive', 'calendar', 'cooking'].forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden');
+                document.getElementById(`view-btn-${v}`).className = 'flex-1 py-2.5 px-2 rounded-xl font-bold text-xs sm:text-sm text-slate-600 flex items-center justify-center gap-1.5 transition-all hover:bg-white/50';
+            });
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            document.getElementById(`view-btn-${viewName}`).className = 'flex-1 py-2.5 px-2 rounded-xl font-bold text-xs sm:text-sm bg-white text-emerald-600 border border-emerald-200 flex items-center justify-center gap-1.5 transition-all shadow-sm';
+            if(viewName === 'calendar') {
+                renderCalendarGrid();
+                renderDayDetail(selectedCalendarDay);
+            }
+            if(window.lucide) lucide.createIcons();
+        }
+
+        function renderInteractiveView() {
+            const container = document.getElementById('meals-container');
+            const selectedMealId = document.getElementById('meal-select').value;
+            container.innerHTML = '';
+
+            if(currentProfileMode === 'both') {
+                const mealsMap = ['levantarse', 'desayuno', 'manana', 'comida', 'merienda', 'cena', 'noche'];
+                mealsMap.forEach(mealId => {
+                    if(selectedMealId !== 'all' && mealId !== selectedMealId) return;
+
+                    const luisMeal = dataLuis.meals.find(m => m.id === mealId);
+                    const beaMeal = dataBea.meals.find(m => m.id === mealId);
+                    if(!luisMeal || !beaMeal) return;
+
+                    const luisDet = currentDayType === 'on' ? luisMeal.on : luisMeal.off;
+                    const beaDet = currentDayType === 'on' ? beaMeal.on : beaMeal.off;
+
+                    const card = document.createElement('div');
+                    card.className = 'bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3';
+                    
+                    card.innerHTML = `
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
+                            <div class="flex items-center gap-2.5">
+                                <div class="p-2 bg-slate-100 rounded-xl text-emerald-600"><i data-lucide="${luisMeal.icon}" class="w-4 h-4"></i></div>
+                                <h3 class="font-extrabold text-xs sm:text-sm text-slate-900">${luisMeal.title}</h3>
+                            </div>
+                            <span class="text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-700">Día ${currentDayType.toUpperCase()}</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1.5">
+                                <span class="text-[11px] font-bold text-emerald-700 uppercase tracking-wider block">👦 Luis</span>
+                                <p class="text-xs font-semibold text-slate-800 flex items-center gap-1.5"><span>${getFoodIcon(luisDet.principal)}</span> <b>Principal:</b> ${luisDet.principal}</p>
+                                <p class="text-xs font-medium text-slate-600 flex items-center gap-1.5"><span>${getFoodIcon(luisDet.complemento)}</span> <b>Complemento:</b> ${luisDet.complemento}</p>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1.5">
+                                <span class="text-[11px] font-bold text-indigo-700 uppercase tracking-wider block">🍏 Bea</span>
+                                <p class="text-xs font-semibold text-slate-800 flex items-center gap-1.5"><span>${getFoodIcon(beaDet.principal)}</span> <b>Principal:</b> ${beaDet.principal}</p>
+                                <p class="text-xs font-medium text-slate-600 flex items-center gap-1.5"><span>${getFoodIcon(beaDet.complemento)}</span> <b>Complemento:</b> ${beaDet.complemento}</p>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } else {
+                const dataset = currentProfileMode === 'luis' ? dataLuis : dataBea;
+                const filteredMeals = dataset.meals.filter(m => selectedMealId === 'all' || m.id === selectedMealId);
+
+                filteredMeals.forEach(meal => {
+                    const details = currentDayType === 'on' ? meal.on : meal.off;
+                    const badgeClass = currentDayType === 'on' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-indigo-100 text-indigo-700 border-indigo-200';
+
+                    const card = document.createElement('div');
+                    card.className = 'bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3';
+                    
+                    card.innerHTML = `
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
+                            <div class="flex items-center gap-2.5">
+                                <div class="p-2 bg-slate-100 rounded-xl text-emerald-600"><i data-lucide="${meal.icon}" class="w-4 h-4"></i></div>
+                                <div>
+                                    <h3 class="font-extrabold text-xs sm:text-sm text-slate-900">${meal.title}</h3>
+                                    <p class="text-[11px] text-slate-500 font-medium">${meal.shared ? '✨ Plato compartido (misma cocina)' : 'Ajuste individual'}</p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] px-3 py-0.5 rounded-full border font-bold ${badgeClass}">Día ${currentDayType.toUpperCase()}</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                                <span class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Alimento Principal (Proteína)</span>
+                                <p class="text-xs font-semibold text-slate-800 flex items-center gap-1.5 mt-0.5"><span class="text-sm">${getFoodIcon(details.principal)}</span> ${details.principal}</p>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                                <span class="text-[10px] font-bold text-indigo-700 uppercase tracking-wider block">Complementos & Hidratos</span>
+                                <p class="text-xs font-semibold text-slate-800 flex items-center gap-1.5 mt-0.5"><span class="text-sm">${getFoodIcon(details.complemento)}</span> ${details.complemento}</p>
+                            </div>
+                        </div>
+                        <div class="bg-emerald-50/50 px-3 py-2 rounded-xl flex items-center justify-between text-[11px] border border-emerald-100 text-slate-700">
+                            <span class="font-bold text-slate-500">Nota cocina:</span>
+                            <span class="font-bold text-emerald-800">${details.nota}</span>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+            if(window.lucide) lucide.createIcons();
+        }
+
+        function changeWeek(direction) {
+            currentSelectedWeek += direction;
+            if(currentSelectedWeek < 1) currentSelectedWeek = 4;
+            if(currentSelectedWeek > 4) currentSelectedWeek = 1;
+            
+            const ranges = { 1: "Sem 1 (1-8 Nov)", 2: "Sem 2 (9-15 Nov)", 3: "Sem 3 (16-22 Nov)", 4: "Semana 4 (23-30 Nov)" };
+            document.getElementById('week-indicator').innerText = ranges[currentSelectedWeek];
+            renderCalendarGrid();
+        }
+
+        function renderCalendarGrid() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+
+            const weekDays = novemberDays.filter(d => d.labelWeek === currentSelectedWeek);
+
+            weekDays.forEach(item => {
+                const isSelected = item.day === selectedCalendarDay;
+                const card = document.createElement('div');
+                card.className = `p-2.5 sm:p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-1.5 ${isSelected ? 'bg-emerald-600 text-white border-emerald-700 shadow-md ring-2 ring-emerald-400' : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-50'}`;
+                card.onclick = () => {
+                    selectedCalendarDay = item.day;
+                    renderCalendarGrid();
+                    renderDayDetail(item.day);
+                };
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="font-extrabold text-xs">Nov ${item.day}</span>
+                        <span class="text-[9px] px-1.5 py-0.5 rounded font-bold ${item.type === 'ON' ? (isSelected ? 'bg-emerald-700 text-white' : 'bg-emerald-100 text-emerald-700') : (isSelected ? 'bg-indigo-700 text-white' : 'bg-indigo-100 text-indigo-700')}">${item.type}</span>
+                    </div>
+                    <div class="text-[10px] font-medium opacity-90 flex items-center gap-1">
+                        <i data-lucide="${item.type === 'ON' ? 'dumbbell' : 'coffee'}" class="w-3 h-3"></i> Día ${item.type}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            if(window.lucide) lucide.createIcons();
+        }
+
+        function renderDayDetail(dayNum) {
+            const dayInfo = novemberDays.find(d => d.day === dayNum);
+            const container = document.getElementById('day-detail-container');
+            const selectedCalMeal = document.getElementById('cal-meal-select').value;
+            if(!dayInfo) return;
+
+            let htmlContent = `
+                <div class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-4 sm:p-5 space-y-3">
+                    <div class="flex justify-between items-center border-b border-emerald-200 pb-2.5">
+                        <h3 class="font-extrabold text-xs sm:text-sm text-emerald-900 flex items-center gap-1.5">
+                            <i data-lucide="calendar" class="w-4 h-4 text-emerald-600"></i> Menú — Día ${dayNum} Nov (${dayInfo.type === 'ON' ? 'Entreno' : 'Descanso'})
+                        </h3>
+                        <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full ${dayInfo.type === 'ON' ? 'bg-emerald-600 text-white' : 'bg-indigo-600 text-white'}">Día ${dayInfo.type}</span>
+                    </div>
+            `;
+
+            const profilesToRender = currentProfileMode === 'both' ? ['luis', 'bea'] : [currentProfileMode];
+
+            profilesToRender.forEach(prof => {
+                const dataset = prof === 'luis' ? dataLuis : dataBea;
+                if(currentProfileMode === 'both') {
+                    htmlContent += `<div class="font-bold text-[11px] uppercase tracking-wider text-emerald-800 pt-1 flex items-center gap-1">👤 Perfil: ${prof === 'luis' ? 'Luis' : 'Bea'}</div>`;
+                }
+
+                const filteredMeals = dataset.meals.filter(m => selectedCalMeal === 'all' || m.id === selectedCalMeal);
+
+                filteredMeals.forEach(meal => {
+                    const details = dayInfo.type === 'ON' ? meal.on : meal.off;
+                    htmlContent += `
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm space-y-1.5">
+                            <div class="flex justify-between items-center text-[11px] font-bold text-slate-700 border-b border-slate-100 pb-1.5">
+                                <span class="flex items-center gap-1.5 text-emerald-700"><i data-lucide="${meal.icon}" class="w-3.5 h-3.5"></i> ${meal.title}</span>
+                                <span class="text-[9px] font-medium text-slate-500">${meal.shared ? '✨ Compartido' : 'Individual'}</span>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-0.5">
+                                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                                    <span class="text-[9px] font-bold text-emerald-700 uppercase block">Principal</span>
+                                    <p class="text-[11px] font-semibold text-slate-800 flex items-center gap-1 mt-0.5"><span>${getFoodIcon(details.principal)}</span> ${details.principal}</p>
+                                </div>
+                                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                                    <span class="text-[9px] font-bold text-indigo-700 uppercase block">Complemento</span>
+                                    <p class="text-[11px] font-semibold text-slate-800 flex items-center gap-1 mt-0.5"><span>${getFoodIcon(details.complemento)}</span> ${details.complemento}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+
+            htmlContent += `</div>`;
+            container.innerHTML = htmlContent;
+            if(window.lucide) lucide.createIcons();
+        }
+
+        renderInteractiveView();
+    </script>
+</body>
+</html>
